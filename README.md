@@ -20,7 +20,9 @@ ExampleDrug2 = {
     Enter = vector3(),
     EnterHeading = ,
     Exit = vector3(),
-    ExitHeading = 
+    ExitHeading = ,
+    PlayAnim = ,
+    AnimName = ''
     }
 ```
 
