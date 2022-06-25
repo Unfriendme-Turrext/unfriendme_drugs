@@ -9,7 +9,7 @@ Config.Drugs = {
         Marker = 1,
         Color = {r = 100, g = 100, b = 100, a = 100},
         MarkerSize = {x = 3.0, y = 3.0, z = 0.3},
-        Collect = vector3(1057.9015, -3194.7842, -39.1613),
+        Collect = vector3(1056.2555, -3189.8098, -39.1003),
         CollectText = 'Press ~b~[E] ~w~to Collect ~g~Weed',
         Process = vector3(1039.2406, -3205.3877, -38.1665),
         ProcessText = 'Press ~b~[E] ~w~to Process ~g~Weed',
@@ -19,7 +19,9 @@ Config.Drugs = {
         Enter = vector3(1066.4044, -3183.3931, -39.1638),
         EnterHeading = 79.4184,
         Exit = vector3(379.1750, -1811.8920, 29.0453),
-        ExitHeading = 130.4102
+        ExitHeading = 130.4102,
+        PlayAnim = true,
+        AnimName = 'world_human_gardener_plant'
     } -- You can add as much as drugs by putting comma here
     -- ExampleDrug2 = {
     --     Draw3dText = ,
@@ -37,7 +39,9 @@ Config.Drugs = {
     --     Enter = vector3(),
     --     EnterHeading = ,
     --     Exit = vector3(),
-    --     ExitHeading = 
+    --     ExitHeading = ,
+    --     PlayAnim = ,
+    --     AnimName = ''
     -- }
 
 }
