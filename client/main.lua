@@ -1,6 +1,7 @@
+local PlayingAnim = false
+
 RegisterNetEvent('esx:playerLoaded') -- Store the players data
 AddEventHandler('esx:playerLoaded', function(xPlayer, isNew)
-	print("Player Loaded. New | " .. isNew)
 	ESX.PlayerData = xPlayer
 	ESX.PlayerLoaded = true
 end)
@@ -20,6 +21,8 @@ AddEventHandler('esx:setJob', function(job)
 	end
 	ESX.PlayerData.job = job
 end)
+
+
 
 function OnPlayerData(key, val, last)
 	if type(val) == 'table' then val = json.encode(val) end
@@ -58,8 +61,20 @@ Citizen.CreateThread(function()
 				if v.Draw3dText then
 					ESX.Game.Utils.DrawText3D(v.Collect, v.CollectText)
 				end
-				if #(v.Collect - PlayerCoords) < 3  and IsControlJustReleased(0, 38) then
-					TriggerServerEvent('unfriendme_scripts:additem', v.Item)
+				if #(v.Collect - PlayerCoords) < 3  and IsControlJustReleased(0, 38) and PlayingAnim == false then
+					if v.PlayAnim and PlayingAnim == false then
+
+						PlayingAnim = true
+
+
+						playanim = true
+						anim = v.AnimName
+						TriggerEvent('unfriendme_scripts:animation', playanim, anim, v.Item)
+					else
+						playanim = false
+						anim = v.AnimName
+						TriggerEvent('unfriendme_scripts:animation', playanim, anim, v.Item)
+					end
 				end
 			end
 		end
@@ -160,4 +175,21 @@ CreateThread(function()
 			EndTextCommandSetBlipName(blip)
 		end
     end
+end)
+
+RegisterNetEvent('unfriendme_scripts:animation')
+AddEventHandler('unfriendme_scripts:animation', function(playanim, anim, Item)
+	if playanim then
+		print(PlayingAnim)
+
+		TaskStartScenarioInPlace(PlayerPedId(), anim, 0, true)
+		Citizen.Wait(10000)
+		TriggerServerEvent('unfriendme_scripts:additem', Item)
+		ClearPedTasksImmediately(PlayerPedId())
+		PlayingAnim = false
+	else
+		TriggerServerEvent('unfriendme_scripts:additem', Item)
+		PlayingAnim = false
+		Wait(5)
+	end
 end)
