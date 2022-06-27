@@ -4,6 +4,7 @@ RegisterNetEvent('esx:playerLoaded') -- Store the players data
 AddEventHandler('esx:playerLoaded', function(xPlayer, isNew)
 	ESX.PlayerData = xPlayer
 	ESX.PlayerLoaded = true
+	Blip()
 end)
 
 RegisterNetEvent('esx:playerLogout') -- When a player logs out (multicharacter), reset their data
@@ -43,129 +44,89 @@ function OnPlayerData(key, val, last)
 	end
 end
 -----------------------------------------------
-
-Citizen.CreateThread(function()
-	while true do
-		local Sleep = 1500
-		local PlayerPed = PlayerPedId() 
-		local PlayerCoords = GetEntityCoords(PlayerPed)
-		for k, v in pairs(Config.Drugs) do
-			if #(v.Collect - PlayerCoords) < 7 then
-				
-				Sleep = 5
-				local x, y, z = table.unpack(v.Collect)
-				if v.DrawMarker then
-					DrawMarker(v.Marker, x, y, z - 1, 0.0,0.0,0.0,0.0,0.0,0.0, v.MarkerSize.x,
-					v.MarkerSize.y, v.MarkerSize.z, v.Color.r, v.Color.g, v.Color.b, 100, false, true, 2, false, false, false, false)
-				end
-				if v.Draw3dText then
-					ESX.Game.Utils.DrawText3D(v.Collect, v.CollectText)
-				end
-				if #(v.Collect - PlayerCoords) < 3  and IsControlJustReleased(0, 38) and PlayingAnim == false then
-					if v.PlayAnim and PlayingAnim == false then
-
-						PlayingAnim = true
-
-
-						playanim = true
-						anim = v.AnimName
-						TriggerEvent('unfriendme_scripts:animation', playanim, anim, v.Item)
-					else
-						playanim = false
-						anim = v.AnimName
-						TriggerEvent('unfriendme_scripts:animation', playanim, anim, v.Item)
-					end
-				end
-			end
-		end
-		
-		Wait(Sleep)
-	end
-end)
-
-
-
-Citizen.CreateThread(function()
-	while true do
-		local Sleep2 = 1500
-		local PlayerPed = PlayerPedId() 
-		local PlayerCoords = GetEntityCoords(PlayerPed)
-		for k, v in pairs(Config.Drugs) do
-			if #(v.Process - PlayerCoords) < 7 then
-				Sleep2 = 5
-				local x, y, z = table.unpack(v.Process)
-
-				
-				if v.DrawMarker then
-					DrawMarker(v.Marker, x, y, z - 1, 0.0,0.0,0.0,0.0,0.0,0.0, v.MarkerSize.x,
-					v.MarkerSize.y, v.MarkerSize.z, v.Color.r, v.Color.g, v.Color.b, 100, false, true, 2, false, false, false, false)
-				end
-				if v.Draw3dText then
-					ESX.Game.Utils.DrawText3D(v.Process, v.ProcessText)
-				end
-				if #(v.Process - PlayerCoords) < 3 and IsControlJustReleased(0, 38) then
-					TriggerServerEvent('unfriendme_scripts:process', v.Item, v.ProcessedItem)
-				end
-			end
-		end
-		Wait(Sleep2)
-	end
-end)
-
-Citizen.CreateThread(function()
-	while true do
-		local Sleep4 = 1500
-		local PlayerPed = PlayerPedId() 
-		local PlayerCoords = GetEntityCoords(PlayerPed)
-		for k, v in pairs(Config.Drugs) do
-			if #(v.Enter - PlayerCoords) < 7 then
-				Sleep4 = 5
-				local x, y, z = table.unpack(v.Exit)
-				if v.EnableTeleport then
-					ESX.Game.Utils.DrawText3D(v.Enter, 'Press ~r~[E] to Exit')
-				end
-				if #(v.Enter - PlayerCoords) < 3 and IsControlJustReleased(0, 38) then
-					Teleport(PlayerPed, {x = x, y = y, z = z, heading = v.ExitHeading})
-				end
-			end
-		end
-		Wait(Sleep4)
-	end
-end)   
-
-Citizen.CreateThread(function()
-	while true do
-		local Sleep5 = 1500
-		local PlayerPed = PlayerPedId() 
-		local PlayerCoords = GetEntityCoords(PlayerPed)
-		for k, v in pairs(Config.Drugs) do
-			if #(v.Exit - PlayerCoords) < 7 then
-				Sleep5 = 5
-				local x, y, z = table.unpack(v.Enter)
-				if v.EnableTeleport then
-					ESX.Game.Utils.DrawText3D(v.Exit, 'Press ~r~[E] to Enter')
-				end
-				if #(v.Exit - PlayerCoords) < 3 and IsControlJustReleased(0, 38) then
-					Teleport(PlayerPed, {x = x, y = y, z = z, heading = v.EnterHeading})
-				end
-			end
-		end
-		Wait(Sleep5)
-	end
-end)
-
-function Teleport(playerPed, entercoords)
-	ESX.Game.Teleport(playerPed, entercoords, function()
-		ESX.ShowNotification('You have been teleported')
-	end)
-end
-
-
 CreateThread(function()
-    for k, v in pairs(Config.Blips) do
+	while true do
+		Wait(0)
+		local sleep = true
+		local PlayerPed = PlayerPedId() 
+		local PlayerCoords = GetEntityCoords(PlayerPed)
+		for k, v in pairs(Config.Drugs) do
+			if #(v.Exit - PlayerCoords) < 4 then
+				sleep = false
+				if v.EnableTeleport then
+					Draw3DText(v.Exit.x, v.Exit.y, v.Exit.z, 'Press ~r~[E] to Enter')
+				end
+				if #(v.Exit - PlayerCoords) < 4 and IsControlJustReleased(0, 38) then
+					tp(PlayerPed, v.Enter.x, v.Enter.y, v.Enter.z)
+				end
+			end
+		if #(v.Enter - PlayerCoords) < 4 then
+			sleep = false
+			if v.EnableTeleport then
+				Draw3DText(v.Enter.x,v.Enter. y, v.Enter.z, 'Press ~r~[E] to Exit')
+			end
+			if #(v.Enter - PlayerCoords) < 3 and IsControlJustReleased(0, 38) then
+				tp(PlayerPed, v.Exit.x, v.Exit.y, v.Exit.z)
+			end
+		end
+		if #(v.Process - PlayerCoords) < 4 then
+			sleep = false
+			if v.DrawMarker then
+				DrawMarker(v.Marker, v.Process.x,v.Process.y,v.Process.z - 1, 0.0,0.0,0.0,0.0,0.0,0.0, v.MarkerSize.x,
+				v.MarkerSize.y, v.MarkerSize.z, v.Color.r, v.Color.g, v.Color.b, 100, false, true, 2, false, false, false, false)
+			end
+			if v.Draw3dText then
+				Draw3DText(v.Process.x,v.Process.y,v.Process.z, v.ProcessText)
+			end
+			if #(v.Process - PlayerCoords) < 3 and IsControlJustReleased(0, 38) then
+				TriggerServerEvent('unfriendme_scripts:process', v.Item, v.ProcessedItem)
+			end
+		end
+		if #(v.Collect - PlayerCoords) < 4 then	
+			sleep = false
+			if v.DrawMarker then
+				DrawMarker(v.Marker, v.Collect.x, v.Collect.y, v.Collect.z - 1, 0.0,0.0,0.0,0.0,0.0,0.0, v.MarkerSize.x,
+				v.MarkerSize.y, v.MarkerSize.z, v.Color.r, v.Color.g, v.Color.b, 100, false, true, 2, false, false, false, false)
+			end
+			if v.Draw3dText then
+				Draw3DText(v.Collect.x, v.Collect.y, v.Collect.z, v.CollectText)
+			end
+			if #(v.Collect - PlayerCoords) < 3  and IsControlJustReleased(0, 38) and PlayingAnim == false then
+				if v.PlayAnim and PlayingAnim == false then
+					PlayingAnim = true
+					playanim = true
+					anim = v.AnimName
+					TriggerEvent('unfriendme_scripts:animation', playanim, anim, v.Item)
+				else
+					playanim = false
+					anim = v.AnimName
+					TriggerEvent('unfriendme_scripts:animation', playanim, anim, v.Item)
+				end
+			end
+		end
+	end
+	if sleep then
+		Wait(500)
+	  end
+	end
+end)
+
+function tp(ped, x, y, z)
+    CreateThread( 
+      function()
+        DoScreenFadeOut(250)
+        while not IsScreenFadedOut() do
+          Wait(0)
+        end
+        SetEntityCoords(ped, x, y, z)
+        DoScreenFadeIn(250)
+		ESX.ShowNotification('You have been teleported')
+      end)
+end
+function Blip()
+	for k, v in pairs(Config.Blips) do
 		if v.Show then
-			local x, y, z = table.unpack(v.Pos)
-			local blip = AddBlipForCoord(x, y, z)
+			local blip = AddBlipForCoord(v.Pos.x, v.Pos.y, v.Pos.z)
 			SetBlipSprite(blip, v.Blip)
 			SetBlipScale(blip, v.Size)
 			SetBlipAsShortRange(blip, true)
@@ -175,15 +136,13 @@ CreateThread(function()
 			EndTextCommandSetBlipName(blip)
 		end
     end
-end)
+end
 
-RegisterNetEvent('unfriendme_scripts:animation')
-AddEventHandler('unfriendme_scripts:animation', function(playanim, anim, Item)
+RegisterNetEvent('unfriendme_scripts:animation', function(playanim, anim, Item)
 	if playanim then
 		print(PlayingAnim)
-
 		TaskStartScenarioInPlace(PlayerPedId(), anim, 0, true)
-		Citizen.Wait(10000)
+		Wait(10000)
 		TriggerServerEvent('unfriendme_scripts:additem', Item)
 		ClearPedTasksImmediately(PlayerPedId())
 		PlayingAnim = false
@@ -193,3 +152,17 @@ AddEventHandler('unfriendme_scripts:animation', function(playanim, anim, Item)
 		Wait(5)
 	end
 end)
+function Draw3DText(x, y, z, text)
+    SetTextScale(0.35, 0.35)
+    SetTextFont(4)
+    SetTextProportional(1)
+    SetTextColour(255, 255, 255, 215)
+    SetTextEntry("STRING")
+    SetTextCentre(true)
+    AddTextComponentString(text)
+    SetDrawOrigin(x,y,z, 0)
+    DrawText(0.0, 0.0)
+    local factor = (string.len(text)) / 370
+    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
+    ClearDrawOrigin()
+  end
